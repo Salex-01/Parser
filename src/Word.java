@@ -1,4 +1,5 @@
 import java.util.HashMap;
+import java.util.LinkedList;
 
 public class Word implements Token {
 	static HashMap<Object, Word> i = new HashMap<>();
@@ -31,11 +32,14 @@ public class Word implements Token {
 	@Override
 	public ParserResult checkAtBeginning(String s, SParser.Flag[] flags, boolean greedy) {
 		if (s.isEmpty()) {
-			return new ParserResult(0);
+			return new ParserResult(false, 0, null);
 		}
 		int i = 0;
 		char c = s.charAt(0);
+		LinkedList<String> result = new LinkedList<>();
+		StringBuilder sb = new StringBuilder();
 		while (matched == Character.isLetter(c)) {
+			sb.append(c);
 			i++;
 			if (i < s.length()) {
 				c = s.charAt(i);
@@ -43,6 +47,7 @@ public class Word implements Token {
 				break;
 			}
 		}
-		return new ParserResult(1);
+		result.add(sb.toString());
+		return new ParserResult(true, i, result);
 	}
 }

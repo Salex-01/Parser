@@ -4,6 +4,7 @@ public class PlaceHolder implements Token {
 	String name;
 	Token value;
 	HashMap<String, Token> dictionary;
+	boolean simplified = false;
 
 	public PlaceHolder(String n, HashMap<String, Token> dict) {
 		dictionary = dict;
@@ -12,9 +13,11 @@ public class PlaceHolder implements Token {
 
 	@Override
 	public Token simplify() throws InvalidPatternException {
+		if (simplified) return value;
+		simplified = true;
 		if (value == null) {
 			value = dictionary.get(name);
-			if (value == null) throw new InvalidPatternException();
+			//if (value == null) throw new InvalidPatternException();
 		}
 		return value.simplify();
 	}

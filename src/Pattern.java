@@ -1,27 +1,24 @@
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
 public class Pattern implements Token {
 	List<Token> tokens = new LinkedList<>();
+	int size = 0;
+	boolean simplified = false;
 
 	public Pattern(String p, HashMap<String, Token> dictionary) throws InvalidPatternException {
-		List<Character> temp = new ArrayList<>();
 		for (int i = 0; i < p.length(); i++) {
 			char c = p.charAt(i);
 			while (c != '\\' && c != '(' && c != ')' && c != '[' && c != ']' && c != '*'
 					&& c != '?' && c != '+' && c != '^' && c != '|' && c != '.' && c != '$') {
-				temp.add(c);
+				tokens.add(new Litteral(c + ""));
+				size++;
 				if (i < p.length() - 1) {
 					c = p.charAt(++i);
 				} else {
 					break;
 				}
-			}
-			if (!temp.isEmpty()) {
-				tokens.add(new Litteral((Character[]) temp.toArray()));
-				temp = new ArrayList<>();
 			}
 			switch (c) {
 				case '\\':
@@ -29,30 +26,45 @@ public class Pattern implements Token {
 						switch (p.charAt(++i)) {
 							case 's':
 								tokens.add(Whitespace.getInstance());
+								size += 2;
 								break;
 							case 'd':
 								tokens.add(Digit.getInstance(true));
+								size += 2;
 								break;
 							case 'D':
 								tokens.add(Digit.getInstance(false));
+								size += 2;
 								break;
 							case 'w':
 								tokens.add(Word.getInstance(true));
+								size += 2;
 								break;
 							case 'W':
 								tokens.add(Word.getInstance(false));
+								size += 2;
 								break;
 							case 'R':
 								tokens.add(this);
+								size += 2;
 								break;
 							case '{':
 								int j = p.indexOf('}', i + 1);
-								if (j == -1) throw new InvalidPatternException();
-								tokens.add(new PlaceHolder(p.substring(i + 1, j), dictionary));
+								if (j == -1 || j == i + 1) throw new InvalidPatternException();
+								if (i == 1 && p.charAt(j - 1) == '=') {    // Save this pattern as ABCD if \{ABCD=} at the beginning
+									if (j == i + 2) {
+										throw new InvalidPatternException();
+									}
+									dictionary.put(p.substring(i + 1, j - 1), this);
+								} else {
+									tokens.add(new PlaceHolder(p.substring(i + 1, j), dictionary));
+								}
+								size += 2 + j - i;
 								i = j;
 								break;
 							case '\\' | '(' | ')' | '[' | ']' | '*' | '?' | '+' | '^' | '|' | '.' | '$':
 								tokens.add(new Litteral(p.charAt(i) + ""));
+								size += 2;
 								break;
 							default:
 								throw new InvalidPatternException();
@@ -60,53 +72,95 @@ public class Pattern implements Token {
 					} else throw new InvalidPatternException();
 					break;
 				case '(':
-
+					Pattern pattern = new Pattern(p.substring(i + 1), dictionary);
+					tokens.add(new GroupCatcher(pattern.simplify()));
+					i += pattern.size + 1;
 					break;
 				case ')':
-					break;
+					size++;
+					simplify();
+					return;
 				case '[':
+					while (i < p.length() && p.charAt(i) != ']') {
+						//TODO
+						i++;
+					}
 					break;
-				case ']':
+				case '{':
+					i++;
+					int j = i;
+					while (j < p.length() && p.charAt(j) != '}') j++;
+					if (j >= p.length()) throw new InvalidPatternException();
+					String[] vals = p.substring(i, j).split(",");
+					if (vals.length == 1) {
+						int n = getIntOrIPE(vals[0]);
+						tokens.add(new NTimes(tokens.remove(tokens.size() - 1), n, n));
+					} else if (vals.length == 2) {
+						tokens.add(new NTimes(tokens.remove(tokens.size() - 1), getIntOrIPE(vals[0]), getIntOrIPE(vals[1])));
+					} else throw new InvalidPatternException();
 					break;
 				case '*':
+					tokens.add(new ZeroToMany(tokens.remove(tokens.size() - 1)));
+					size++;
 					break;
 				case '?':
+					tokens.add(new ZeroOrOne(tokens.remove(tokens.size() - 1)));
+					size++;
 					break;
 				case '+':
+					tokens.add(new OneOrMany(tokens.remove(tokens.size() - 1)));
+					size++;
 					break;
 				case '^':
+					tokens.add(Beginning.getInstance());
+					size++;
 					break;
 				case '|':
+					tokens.add(new Or());
+					size++;
 					break;
 				case '.':
+					tokens.add(Any.getInstance());
 					break;
 				case '$':
+					tokens.add(Ending.getInstance());
 					break;
 			}
 		}
 		simplify();
 	}
 
+	private int getIntOrIPE(String val) throws InvalidPatternException {
+		try {
+			return Integer.parseInt(val);
+		} catch (NumberFormatException e) {
+			throw new InvalidPatternException();
+		}
+	}
+
 	public Token simplify() throws InvalidPatternException {
-		List<Token> res = new LinkedList<>();
-		Litteral last = null;
-		for (Token t : tokens) {
-			t = t.simplify();
-			if (t != null) {
-				if (t instanceof Litteral) {
-					if (last == null) {
-						last = (Litteral) t;
+		if (!simplified) {
+			List<Token> res = new LinkedList<>();
+			Litteral last = null;
+			for (Token t : tokens) {
+				t = t.simplify();
+				if (t != null) {
+					if (t instanceof Litteral) {
+						if (last == null) {
+							last = (Litteral) t;
+						} else {
+							last.value += ((Litteral) t).value;
+						}
 					} else {
-						last.value += ((Litteral) t).value;
+						res.add(last);
+						last = null;
+						res.add(t);
 					}
-				} else {
-					res.add(last);
-					last = null;
-					res.add(t);
 				}
 			}
+			tokens = res;
+			simplified = true;
 		}
-		tokens = res;
 		return tokens.isEmpty() ? null : this;
 	}
 
