@@ -19,27 +19,41 @@ public class Litteral implements Token {
 	}
 
 	@Override
-	public boolean check(String s, SParser.Flag[] flags, boolean greedy) {
-		for (SParser.Flag f : flags) {
-			if (f == SParser.Flag.IGNORE_CASE) {
-				return s.toLowerCase().contains(value.toLowerCase());
-			}
+	public ParserResult search(String s, SParser.Flag flags, boolean greedy,ParserResult pr) {
+		String nValue = value;
+		String nS = s;
+		if ((flags.v & SParser.Flag.IGNORE_CASE.v) != 0) {
+			nS = s.toLowerCase();
+			nValue = value.toLowerCase();
 		}
-		return s.contains(value);
+		for (int i = 0; i < nS.length() - nValue.length() + 1; i++) {
+			boolean ok = true;
+			for (int j = 0; j < nValue.length(); j++) {
+				if (nS.charAt(i + j) != nValue.charAt(j)) {
+					ok = false;
+					break;
+				}
+			}
+			if (ok) return new ParserResult(true, value.length(), s.substring(i, i + value.length()), null, i);
+		}
+		return new ParserResult(false, 0, null, null, -1);
 	}
 
 	@Override
-	public ParserResult checkAtBeginning(String s, SParser.Flag[] flags, boolean greedy) {
-		int i = 0;
-		String v = value;
-		for (SParser.Flag f : flags) {
-			if (f == SParser.Flag.IGNORE_CASE) {
-				s = s.toLowerCase();
-				v = value.toLowerCase();
+	public ParserResult match(String s, SParser.Flag flags, boolean greedy,ParserResult pr) {
+		String nValue = value;
+		String nS = s;
+		if ((flags.v & SParser.Flag.IGNORE_CASE.v) != 0) {
+			nS = s.toLowerCase();
+			nValue = value.toLowerCase();
+		}
+		boolean ok = true;
+		for (int i = 0; i < nValue.length(); i++) {
+			if (nS.charAt(i) != nValue.charAt(i)) {
+				ok = false;
 				break;
 			}
 		}
-		while (s.substring(i * v.length()).startsWith(v)) i++;
-		return new ParserResult(1);
+		return new ParserResult(ok, ok ? value.length() : 0, ok ? s.substring(0, value.length()) : null, null, ok ? 0 : -1);
 	}
 }

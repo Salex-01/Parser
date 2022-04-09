@@ -1,7 +1,16 @@
 import java.util.HashMap;
 
 public class SParser {
-	enum Flag {IGNORE_CASE/*, LINE_BY_LINE*/}
+	enum Flag {
+		IGNORE_CASE(1),
+		LINE_BY_LINE(2);
+
+		final int v;
+
+		Flag(int value) {
+			this.v = value;
+		}
+	}
 
 	HashMap<String, Token> dict = new HashMap<>();
 
@@ -26,7 +35,7 @@ public class SParser {
 	}
 
 	public ParserResult parse(Pattern[] patterns, String string, Flag[] flags, boolean greedy) {
-		patterns[0].check(string, flags, greedy);
+		patterns[0].search(string, flags, greedy);
 		return null;    //TODO
 	}
 

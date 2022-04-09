@@ -1,4 +1,6 @@
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 
 public class Digit implements Token {
 	static HashMap<Object, Digit> i = new HashMap<>();
@@ -18,31 +20,20 @@ public class Digit implements Token {
 	}
 
 	@Override
-	public boolean check(String s, SParser.Flag[] flags, boolean greedy) {
-		for (int i = 0; i < s.length(); i++) {
-			char c = s.charAt(i);
-			if ((matched && (c >= '0' && c <= '9')) || (!matched && (c < '0' || c > '9'))) {
-				return true;
-			}
+	public ParserResult search(String s, SParser.Flag flags, boolean greedy, ParserResult pr) {
+		int i = 0;
+		for (char c : s.toCharArray()) {
+			if ((matched == (c >= '0' && c <= '9')))
+				return new ParserResult(true, 1, c + "", null, i);
+			i++;
 		}
-		return false;
+		return new ParserResult(false, 0, null, null, -1);
 	}
 
 	@Override
-	public ParserResult checkAtBeginning(String s, SParser.Flag[] flags, boolean greedy) {
-		if (s.isEmpty()) {
-			return new ParserResult(0);
-		}
-		int i = 0;
-		char c = s.charAt(0);
-		while ((matched && (c >= '0' && c <= '9')) || (!matched && (c < '0' || c > '9'))) {
-			i++;
-			if (i < s.length()) {
-				c = s.charAt(i);
-			} else {
-				break;
-			}
-		}
-		return new ParserResult(i);
+	public ParserResult match(String s, SParser.Flag flags, boolean greedy, ParserResult pr) {
+		if (s.isEmpty()) return new ParserResult(false, 0, null, null, -1);
+		boolean ok = (matched == (s.charAt(0) >= '0' && s.charAt(0) <= '9'));
+		return new ParserResult(ok, ok ? 1 : 0, s.charAt(0) + "", null, 0);
 	}
 }

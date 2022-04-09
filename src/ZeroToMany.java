@@ -8,17 +8,16 @@ public class ZeroToMany implements Token {
 	@Override
 	public Token simplify() throws InvalidPatternException {
 		if (nested != null) nested = nested.simplify();
-		return nested == null ? null : this;
+		return nested == null ? null : new NTimes(nested, 0, Long.MAX_VALUE);
 	}
 
 	@Override
-	public boolean check(String s, SParser.Flag[] flags, boolean greedy) throws InvalidPatternException {
-		return true;
+	public ParserResult search(String s, SParser.Flag flags, boolean greedy, ParserResult pr) throws InvalidPatternException {
+		return new NTimes(nested, 0, Long.MAX_VALUE).search(s, flags, greedy, pr);
 	}
 
 	@Override
-	public ParserResult checkAtBeginning(String s, SParser.Flag[] flags, boolean greedy) throws InvalidPatternException {
-		ParserResult pr = nested.checkAtBeginning(s, flags, greedy);
-		return new ParserResult(true, pr.matchNumber, pr.capturedGroups);
+	public ParserResult match(String s, SParser.Flag flags, boolean greedy, ParserResult pr) throws InvalidPatternException {
+		return new NTimes(nested, 0, Long.MAX_VALUE).match(s, flags, greedy, pr);
 	}
 }

@@ -57,7 +57,17 @@ public class Pattern implements Token {
 									}
 									dictionary.put(p.substring(i + 1, j - 1), this);
 								} else {
-									tokens.add(new PlaceHolder(p.substring(i + 1, j), dictionary));
+									boolean getter = true;
+									for (char c2 : p.substring(i + 1, j).toCharArray()) {
+										if ((c2 < '0' || c2 > '9') && c2 != '.') {
+											tokens.add(new PlaceHolder(p.substring(i + 1, j), dictionary));
+											getter = false;
+											break;
+										}
+									}
+									if (getter) {
+										tokens.add(new GroupGetter(p.substring(i + 1, j)));
+									}
 								}
 								size += 2 + j - i;
 								i = j;
@@ -152,8 +162,10 @@ public class Pattern implements Token {
 							last.value += ((Litteral) t).value;
 						}
 					} else {
-						res.add(last);
-						last = null;
+						if (last != null) {
+							res.add(last);
+							last = null;
+						}
 						res.add(t);
 					}
 				}
@@ -165,12 +177,12 @@ public class Pattern implements Token {
 	}
 
 	@Override
-	public boolean check(String s, SParser.Flag[] flags, boolean greedy) {
-		return false;
+	public ParserResult search(String s, SParser.Flag flags, boolean greedy,ParserResult pr) {
+		return null;
 	}
 
 	@Override
-	public ParserResult checkAtBeginning(String s, SParser.Flag[] flags, boolean greedy) {
+	public ParserResult match(String s, SParser.Flag flags, boolean greedy,ParserResult pr) {
 		return null;
 	}
 }

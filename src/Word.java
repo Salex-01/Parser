@@ -1,5 +1,4 @@
 import java.util.HashMap;
-import java.util.LinkedList;
 
 public class Word implements Token {
 	static HashMap<Object, Word> i = new HashMap<>();
@@ -19,35 +18,19 @@ public class Word implements Token {
 	}
 
 	@Override
-	public boolean check(String s, SParser.Flag[] flags, boolean greedy) {
-		for (int i = 0; i < s.length(); i++) {
-			char c = s.charAt(i);
-			if (matched == Character.isLetter(c)) {
-				return true;
-			}
+	public ParserResult search(String s, SParser.Flag flags, boolean greedy,ParserResult pr) {
+		int i = 0;
+		for (char c : s.toCharArray()) {
+			if (matched == Character.isLetter(c)) return new ParserResult(true, 1, c + "", null, i);
+			i++;
 		}
-		return false;
+		return new ParserResult(false, 0, null, null, -1);
 	}
 
 	@Override
-	public ParserResult checkAtBeginning(String s, SParser.Flag[] flags, boolean greedy) {
-		if (s.isEmpty()) {
-			return new ParserResult(false, 0, null);
-		}
-		int i = 0;
-		char c = s.charAt(0);
-		LinkedList<String> result = new LinkedList<>();
-		StringBuilder sb = new StringBuilder();
-		while (matched == Character.isLetter(c)) {
-			sb.append(c);
-			i++;
-			if (i < s.length()) {
-				c = s.charAt(i);
-			} else {
-				break;
-			}
-		}
-		result.add(sb.toString());
-		return new ParserResult(true, i, result);
+	public ParserResult match(String s, SParser.Flag flags, boolean greedy,ParserResult pr) {
+		if (s.isEmpty()) return new ParserResult(false, 0, null, null, -1);
+		boolean ok = matched == Character.isLetter(s.charAt(0));
+		return new ParserResult(ok, ok ? 1 : 0, ok ? s.charAt(0) + "" : null, null, ok ? 0 : -1);
 	}
 }

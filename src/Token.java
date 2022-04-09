@@ -1,7 +1,9 @@
+import java.util.List;
+
 public interface Token {
 	Token simplify() throws InvalidPatternException;
 
-	boolean check(String s,SParser.Flag[] flags, boolean greedy) throws InvalidPatternException;
+	ParserResult search(String s, SParser.Flag flags, boolean greedy,ParserResult pr) throws InvalidPatternException;
 
-	ParserResult checkAtBeginning(String s,SParser.Flag[] flags, boolean greedy) throws InvalidPatternException;
+	ParserResult match(String s, SParser.Flag flags, boolean greedy,ParserResult pr) throws InvalidPatternException;
 }
