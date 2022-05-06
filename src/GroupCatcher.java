@@ -10,24 +10,24 @@ public class GroupCatcher implements Token {
 
 	@Override
 	public Token simplify() throws InvalidPatternException {
-		return null;	//TODO
+		return null;    //TODO
 	}
 
 	@Override
-	public ParserResult search(String s, SParser.Flag flags, boolean greedy,ParserResult pr) throws InvalidPatternException {
-		ParserResult result = nested.search(s, flags, greedy,pr);
-		if(result.ok){
+	public ParserResult search(String s, SParser.Flag flags, boolean greedy, ParserResult pr, long offset, long lineOffset) throws InvalidPatternException {
+		ParserResult result = nested.search(s, flags, greedy, pr, offset, lineOffset);
+		if (result.ok) {
 			LinkedList<ParserResult> groups = new LinkedList<>(List.of(result));
 			if (result.capturedGroups != null) {
 				groups.addAll(result.capturedGroups);
 			}
 			return new ParserResult(true, result.matchSize, result.value, new LinkedList<>(List.of(result)), result.position);
 		}
-		return null;	//TODO
+		return null;    //TODO
 	}
 
 	@Override
-	public ParserResult match(String s, SParser.Flag flags, boolean greedy,ParserResult pr) throws InvalidPatternException {
-		return null;	//TODO
+	public ParserResult match(String s, SParser.Flag flags, boolean greedy, ParserResult pr, long offset, long lineOffset) throws InvalidPatternException {
+		return null;    //TODO
 	}
 }

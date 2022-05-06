@@ -3,7 +3,8 @@ import java.util.HashMap;
 public class SParser {
 	enum Flag {
 		IGNORE_CASE(1),
-		LINE_BY_LINE(2);
+		LINE_BY_LINE(2),
+		DOT_IS_WILDCARD(4);
 
 		final int v;
 

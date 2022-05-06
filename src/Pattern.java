@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -8,24 +9,31 @@ public class Pattern implements Token {
 	boolean simplified = false;
 
 	public Pattern(String p, HashMap<String, Token> dictionary) throws InvalidPatternException {
+		boolean over = false;
 		for (int i = 0; i < p.length(); i++) {
 			char c = p.charAt(i);
 			while (c != '\\' && c != '(' && c != ')' && c != '[' && c != ']' && c != '*'
-					&& c != '?' && c != '+' && c != '^' && c != '|' && c != '.' && c != '$') {
+					&& c != '?' && c != '+' && c != '^' && c != '|' && c != '.' && c != '$' && c != '{' && c != '}') {
 				tokens.add(new Litteral(c + ""));
 				size++;
 				if (i < p.length() - 1) {
 					c = p.charAt(++i);
 				} else {
+					over = true;
 					break;
 				}
 			}
+			if (over) break;
 			switch (c) {
 				case '\\':
 					if (i < p.length() - 1) {
 						switch (p.charAt(++i)) {
 							case 's':
-								tokens.add(Whitespace.getInstance());
+								tokens.add(Whitespace.getInstance(true));
+								size += 2;
+								break;
+							case 'S':
+								tokens.add(Whitespace.getInstance(false));
 								size += 2;
 								break;
 							case 'd':
@@ -72,12 +80,10 @@ public class Pattern implements Token {
 								size += 2 + j - i;
 								i = j;
 								break;
-							case '\\' | '(' | ')' | '[' | ']' | '*' | '?' | '+' | '^' | '|' | '.' | '$':
+							default:
 								tokens.add(new Litteral(p.charAt(i) + ""));
 								size += 2;
 								break;
-							default:
-								throw new InvalidPatternException();
 						}
 					} else throw new InvalidPatternException();
 					break;
@@ -91,10 +97,20 @@ public class Pattern implements Token {
 					simplify();
 					return;
 				case '[':
+					boolean inverted = ((++i) < p.length() && p.charAt(i) == '^');
+					i++;
+					ArrayList<Character> list = new ArrayList<>();
 					while (i < p.length() && p.charAt(i) != ']') {
-						//TODO
-						i++;
+						if (p.charAt(i) == '\\' && i < p.length() - 1) {
+							list.add(p.charAt(i + 1));
+							i += 2;
+						} else {
+							list.add(p.charAt(i));
+							i++;
+						}
 					}
+					if (i == p.length()) throw new InvalidPatternException();
+					tokens.add(new AnyLitteral(inverted, list));
 					break;
 				case '{':
 					i++;
@@ -125,15 +141,16 @@ public class Pattern implements Token {
 					tokens.add(Beginning.getInstance());
 					size++;
 					break;
+				case '$':
+					tokens.add(Ending.getInstance());
+					break;
 				case '|':
-					tokens.add(new Or());
+					tokens.add(new Or(tokens.remove(tokens.size() - 1)));
 					size++;
 					break;
 				case '.':
 					tokens.add(Any.getInstance());
-					break;
-				case '$':
-					tokens.add(Ending.getInstance());
+					size++;
 					break;
 			}
 		}
@@ -177,12 +194,12 @@ public class Pattern implements Token {
 	}
 
 	@Override
-	public ParserResult search(String s, SParser.Flag flags, boolean greedy,ParserResult pr) {
+	public ParserResult search(String s, SParser.Flag flags, boolean greedy, ParserResult pr, long offset, long lineOffset) {
 		return null;
 	}
 
 	@Override
-	public ParserResult match(String s, SParser.Flag flags, boolean greedy,ParserResult pr) {
+	public ParserResult match(String s, SParser.Flag flags, boolean greedy, ParserResult pr, long offset, long lineOffset) {
 		return null;
 	}
 }

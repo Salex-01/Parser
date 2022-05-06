@@ -23,20 +23,20 @@ public class PlaceHolder implements Token {
 	}
 
 	@Override
-	public ParserResult search(String s, SParser.Flag flags, boolean greedy,ParserResult pr) throws InvalidPatternException {
+	public ParserResult search(String s, SParser.Flag flags, boolean greedy, ParserResult pr, long offset, long lineOffset) throws InvalidPatternException {
 		if (value == null) {
 			value = dictionary.get(name);
 			if (value == null) throw new InvalidPatternException();
 		}
-		return value.search(s, flags, greedy,pr);
+		return value.search(s, flags, greedy, pr, offset, lineOffset);
 	}
 
 	@Override
-	public ParserResult match(String s, SParser.Flag flags, boolean greedy,ParserResult pr) throws InvalidPatternException {
+	public ParserResult match(String s, SParser.Flag flags, boolean greedy, ParserResult pr, long offset, long lineOffset) throws InvalidPatternException {
 		if (value == null) {
 			value = dictionary.get(name);
 			if (value == null) throw new InvalidPatternException();
 		}
-		return value.match(s, flags, greedy,pr);
+		return value.match(s, flags, greedy, pr, offset, lineOffset);
 	}
 }

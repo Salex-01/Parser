@@ -21,31 +21,31 @@ public class NTimes implements Token {
 	}
 
 	@Override
-	public ParserResult search(String s, SParser.Flag flags, boolean greedy, ParserResult pr) throws InvalidPatternException {
-		ParserResult r = nested.search(s, flags, greedy, pr);
+	public ParserResult search(String s, SParser.Flag flags, boolean greedy, ParserResult pr, long offset, long lineOffset) throws InvalidPatternException {
+		ParserResult r = nested.search(s, flags, greedy, pr, offset, lineOffset);
 		if (!r.ok) return r;
 		ParserResult result = new ParserResult(true, r.matchSize, r.value, new LinkedList<>(List.of(r)), r.position);
-		ParserResult tmp = nested.match(s.substring(result.position + result.matchSize), flags, greedy, pr);
-		return getParserResult(s, flags, greedy, result, tmp, pr);
+		ParserResult tmp = nested.match(s.substring(result.position + result.matchSize), flags, greedy, pr, offset, lineOffset);
+		return getParserResult(s, flags, greedy, result, tmp, pr, offset, lineOffset);
 	}
 
 	@Override
-	public ParserResult match(String s, SParser.Flag flags, boolean greedy, ParserResult pr) throws InvalidPatternException {
-		ParserResult r = nested.match(s, flags, greedy, pr);
+	public ParserResult match(String s, SParser.Flag flags, boolean greedy, ParserResult pr, long offset, long lineOffset) throws InvalidPatternException {
+		ParserResult r = nested.match(s, flags, greedy, pr, offset, lineOffset);
 		if (!r.ok) return r;
 		ParserResult result = new ParserResult(true, r.matchSize, r.value, new LinkedList<>(List.of(r)), 0);
-		ParserResult tmp = nested.match(s.substring(result.matchSize), flags, greedy, pr);
-		return getParserResult(s, flags, greedy, result, tmp, pr);
+		ParserResult tmp = nested.match(s.substring(result.matchSize), flags, greedy, pr, offset, lineOffset);
+		return getParserResult(s, flags, greedy, result, tmp, pr, offset, lineOffset);
 	}
 
-	private ParserResult getParserResult(String s, SParser.Flag flags, boolean greedy, ParserResult result, ParserResult tmp, ParserResult pr) throws InvalidPatternException {
+	private ParserResult getParserResult(String s, SParser.Flag flags, boolean greedy, ParserResult result, ParserResult tmp, ParserResult pr, long offset, long lineOffset) throws InvalidPatternException {
 		long count = 1;
 		while (tmp.ok && count < max) {
 			count++;
 			result.matchSize += tmp.matchSize;
 			result.value = tmp.value;
 			result.capturedGroups.addLast(tmp);
-			tmp = nested.match(s.substring(result.position + result.matchSize), flags, greedy, pr);
+			tmp = nested.match(s.substring(result.position + result.matchSize), flags, greedy, pr, offset, lineOffset);
 		}
 		boolean ok = count >= min;
 		return new ParserResult(ok, ok ? result.matchSize : 0, ok ? result.value : null, ok ? result.capturedGroups : null, ok ? result.position : -1);

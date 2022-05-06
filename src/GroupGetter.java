@@ -12,20 +12,20 @@ public class GroupGetter implements Token {
 	}
 
 	@Override
-	public ParserResult search(String s, SParser.Flag flags, boolean greedy, ParserResult pr) throws InvalidPatternException {
+	public ParserResult search(String s, SParser.Flag flags, boolean greedy, ParserResult pr, long offset, long lineOffset) throws InvalidPatternException {
 		setRuntimeEval(pr);
-		return runTimeEval.search(s, flags, greedy, pr);
+		return runTimeEval.search(s, flags, greedy, pr, offset, lineOffset);
 	}
 
 	@Override
-	public ParserResult match(String s, SParser.Flag flags, boolean greedy, ParserResult pr) throws InvalidPatternException {
+	public ParserResult match(String s, SParser.Flag flags, boolean greedy, ParserResult pr, long offset, long lineOffset) throws InvalidPatternException {
 		setRuntimeEval(pr);
-		return runTimeEval.match(s, flags, greedy, pr);
+		return runTimeEval.match(s, flags, greedy, pr, offset, lineOffset);
 	}
 
 	private void setRuntimeEval(ParserResult pr) throws InvalidPatternException {
 		if (runTimeEval == null) {
-			ParserResult pr2=pr;
+			ParserResult pr2 = pr;
 			String[] indexes = name.split("\\.");
 			for (String value : indexes) {
 				int index = Integer.parseInt(value);

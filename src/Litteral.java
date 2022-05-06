@@ -19,7 +19,7 @@ public class Litteral implements Token {
 	}
 
 	@Override
-	public ParserResult search(String s, SParser.Flag flags, boolean greedy,ParserResult pr) {
+	public ParserResult search(String s, SParser.Flag flags, boolean greedy,ParserResult pr, long offset, long lineOffset) {
 		String nValue = value;
 		String nS = s;
 		if ((flags.v & SParser.Flag.IGNORE_CASE.v) != 0) {
@@ -40,7 +40,7 @@ public class Litteral implements Token {
 	}
 
 	@Override
-	public ParserResult match(String s, SParser.Flag flags, boolean greedy,ParserResult pr) {
+	public ParserResult match(String s, SParser.Flag flags, boolean greedy,ParserResult pr, long offset, long lineOffset) {
 		String nValue = value;
 		String nS = s;
 		if ((flags.v & SParser.Flag.IGNORE_CASE.v) != 0) {
