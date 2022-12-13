@@ -14,8 +14,8 @@ public class GroupCatcher implements Token {
 	}
 
 	@Override
-	public ParserResult search(String s, SParser.Flag flags, boolean greedy, ParserResult pr, long offset, long lineOffset) throws InvalidPatternException {
-		ParserResult result = nested.search(s, flags, greedy, pr, offset, lineOffset);
+	public ParserResult search(String s, int flags, ParserResult pr, long offset, long lineOffset) throws InvalidPatternException {
+		ParserResult result = nested.search(s, flags, pr, offset, lineOffset);
 		if (result.ok) {
 			LinkedList<ParserResult> groups = new LinkedList<>(List.of(result));
 			if (result.capturedGroups != null) {
@@ -27,7 +27,17 @@ public class GroupCatcher implements Token {
 	}
 
 	@Override
-	public ParserResult match(String s, SParser.Flag flags, boolean greedy, ParserResult pr, long offset, long lineOffset) throws InvalidPatternException {
+	public ParserResult match(String s, int flags, ParserResult pr, long offset, long lineOffset) throws InvalidPatternException {
 		return null;    //TODO
+	}
+
+	@Override
+	public boolean takeOneMore(String s, int flags, ParserResult pr, long offset, long lineOffset) throws InvalidPatternException {
+		return false; //TODO
+	}
+
+	@Override
+	public boolean giveOneBack(String s, int flags, ParserResult pr, long offset, long lineOffset) throws InvalidPatternException {
+		return false; //TODO
 	}
 }

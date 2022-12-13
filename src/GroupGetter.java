@@ -12,15 +12,15 @@ public class GroupGetter implements Token {
 	}
 
 	@Override
-	public ParserResult search(String s, SParser.Flag flags, boolean greedy, ParserResult pr, long offset, long lineOffset) throws InvalidPatternException {
+	public ParserResult search(String s, int flags, ParserResult pr, long offset, long lineOffset) throws InvalidPatternException {
 		setRuntimeEval(pr);
-		return runTimeEval.search(s, flags, greedy, pr, offset, lineOffset);
+		return runTimeEval.search(s, flags, pr, offset, lineOffset);
 	}
 
 	@Override
-	public ParserResult match(String s, SParser.Flag flags, boolean greedy, ParserResult pr, long offset, long lineOffset) throws InvalidPatternException {
+	public ParserResult match(String s, int flags, ParserResult pr, long offset, long lineOffset) throws InvalidPatternException {
 		setRuntimeEval(pr);
-		return runTimeEval.match(s, flags, greedy, pr, offset, lineOffset);
+		return runTimeEval.match(s, flags, pr, offset, lineOffset);
 	}
 
 	private void setRuntimeEval(ParserResult pr) throws InvalidPatternException {
@@ -35,5 +35,15 @@ public class GroupGetter implements Token {
 			if (pr2.value == null) throw new InvalidPatternException();
 			runTimeEval = new Litteral(pr2.value);
 		}
+	}
+
+	@Override
+	public boolean takeOneMore(String s, int flags, ParserResult pr, long offset, long lineOffset) throws InvalidPatternException {
+		return false; //TODO
+	}
+
+	@Override
+	public boolean giveOneBack(String s, int flags, ParserResult pr, long offset, long lineOffset) throws InvalidPatternException {
+		return false; //TODO
 	}
 }

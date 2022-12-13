@@ -18,7 +18,7 @@ public class Word implements Token {
 	}
 
 	@Override
-	public ParserResult search(String s, SParser.Flag flags, boolean greedy,ParserResult pr, long offset, long lineOffset) {
+	public ParserResult search(String s, int flags, ParserResult pr, long offset, long lineOffset) {
 		int i = 0;
 		for (char c : s.toCharArray()) {
 			if (matched == Character.isLetter(c)) return new ParserResult(true, 1, c + "", null, i);
@@ -28,9 +28,19 @@ public class Word implements Token {
 	}
 
 	@Override
-	public ParserResult match(String s, SParser.Flag flags, boolean greedy,ParserResult pr, long offset, long lineOffset) {
+	public ParserResult match(String s, int flags,ParserResult pr, long offset, long lineOffset) {
 		if (s.isEmpty()) return new ParserResult(false, 0, null, null, -1);
 		boolean ok = matched == Character.isLetter(s.charAt(0));
 		return new ParserResult(ok, ok ? 1 : 0, ok ? s.charAt(0) + "" : null, null, ok ? 0 : -1);
+	}
+
+	@Override
+	public boolean takeOneMore(String s, int flags, ParserResult pr, long offset, long lineOffset) throws InvalidPatternException {
+		return false; //TODO
+	}
+
+	@Override
+	public boolean giveOneBack(String s, int flags, ParserResult pr, long offset, long lineOffset) throws InvalidPatternException {
+		return false; //TODO
 	}
 }

@@ -36,8 +36,11 @@ public class SParser {
 	}
 
 	public ParserResult parse(Pattern[] patterns, String string, Flag[] flags, boolean greedy) {
-		patterns[0].search(string, flags, greedy);
-		return null;    //TODO
+		int f = 0;
+		for (Flag g:flags){
+			f+=g.v;
+		}
+		return patterns[0].search(string,f, null,0,0);
 	}
 
 	public ParserResult parse(Pattern[] patterns, String string, Flag[] flags) {
@@ -45,7 +48,7 @@ public class SParser {
 	}
 
 	public ParserResult parse(Pattern[] patterns, String string, boolean greedy) {
-		return parse(patterns, string, null, greedy);
+		return parse(patterns, string, new Flag[0], greedy);
 	}
 
 	public ParserResult parse(Pattern[] patterns, String string) {

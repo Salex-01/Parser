@@ -23,20 +23,30 @@ public class PlaceHolder implements Token {
 	}
 
 	@Override
-	public ParserResult search(String s, SParser.Flag flags, boolean greedy, ParserResult pr, long offset, long lineOffset) throws InvalidPatternException {
+	public ParserResult search(String s, int flags, ParserResult pr, long offset, long lineOffset) throws InvalidPatternException {
 		if (value == null) {
 			value = dictionary.get(name);
 			if (value == null) throw new InvalidPatternException();
 		}
-		return value.search(s, flags, greedy, pr, offset, lineOffset);
+		return value.search(s, flags, pr, offset, lineOffset);
 	}
 
 	@Override
-	public ParserResult match(String s, SParser.Flag flags, boolean greedy, ParserResult pr, long offset, long lineOffset) throws InvalidPatternException {
+	public ParserResult match(String s, int flags, ParserResult pr, long offset, long lineOffset) throws InvalidPatternException {
 		if (value == null) {
 			value = dictionary.get(name);
 			if (value == null) throw new InvalidPatternException();
 		}
-		return value.match(s, flags, greedy, pr, offset, lineOffset);
+		return value.match(s, flags, pr, offset, lineOffset);
+	}
+
+	@Override
+	public boolean takeOneMore(String s, int flags, ParserResult pr, long offset, long lineOffset) throws InvalidPatternException {
+		return false; //TODO
+	}
+
+	@Override
+	public boolean giveOneBack(String s, int flags, ParserResult pr, long offset, long lineOffset) throws InvalidPatternException {
+		return false; //TODO
 	}
 }

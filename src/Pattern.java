@@ -1,19 +1,21 @@
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 public class Pattern implements Token {
 	List<Token> tokens = new LinkedList<>();
 	int size = 0;
 	boolean simplified = false;
 
+	public Pattern(List<Token> l, int s) {
+		tokens = l;
+		size = s;
+	}
+
 	public Pattern(String p, HashMap<String, Token> dictionary) throws InvalidPatternException {
 		boolean over = false;
 		for (int i = 0; i < p.length(); i++) {
 			char c = p.charAt(i);
-			while (c != '\\' && c != '(' && c != ')' && c != '[' && c != ']' && c != '*'
-					&& c != '?' && c != '+' && c != '^' && c != '|' && c != '.' && c != '$' && c != '{' && c != '}') {
+			while (c != '\\' && c != '(' && c != ')' && c != '[' && c != ']' && c != '*' && c != '/'
+					&& c != '?' && c != '!' && c != '+' && c != '-' && c != ':' && c != '^' && c != '|' && c != '.' && c != '$' && c != '{' && c != '}') {
 				tokens.add(new Litteral(c + ""));
 				size++;
 				if (i < p.length() - 1) {
@@ -60,9 +62,7 @@ public class Pattern implements Token {
 								int j = p.indexOf('}', i + 1);
 								if (j == -1 || j == i + 1) throw new InvalidPatternException();
 								if (i == 1 && p.charAt(j - 1) == '=') {    // Save this pattern as ABCD if \{ABCD=} at the beginning
-									if (j == i + 2) {
-										throw new InvalidPatternException();
-									}
+									if (j == i + 2) throw new InvalidPatternException();
 									dictionary.put(p.substring(i + 1, j - 1), this);
 								} else {
 									boolean getter = true;
@@ -120,22 +120,58 @@ public class Pattern implements Token {
 					String[] vals = p.substring(i, j).split(",");
 					if (vals.length == 1) {
 						int n = getIntOrIPE(vals[0]);
-						tokens.add(new NTimes(tokens.remove(tokens.size() - 1), n, n));
+						tokens.add(new NTimes(tokens.remove(tokens.size() - 1), n, n, false));
 					} else if (vals.length == 2) {
-						tokens.add(new NTimes(tokens.remove(tokens.size() - 1), getIntOrIPE(vals[0]), getIntOrIPE(vals[1])));
+						tokens.add(new NTimes(tokens.remove(tokens.size() - 1), getIntOrIPE(vals[0]), getIntOrIPE(vals[1]), false));
+					} else if (vals.length == 3 && (vals[2].equals("-")) || vals[2].equals("+")) {
+						tokens.add(new NTimes(tokens.remove(tokens.size() - 1), getIntOrIPE(vals[0]), getIntOrIPE(vals[1]), vals[2].equals("+")));
 					} else throw new InvalidPatternException();
 					break;
 				case '*':
-					tokens.add(new ZeroToMany(tokens.remove(tokens.size() - 1)));
+					tokens.add(new ZeroToMany(tokens.remove(tokens.size() - 1), true));
+					size++;
+					break;
+				case '/':
+					tokens.add(new ZeroToMany(tokens.remove(tokens.size() - 1), false));
 					size++;
 					break;
 				case '?':
-					tokens.add(new ZeroOrOne(tokens.remove(tokens.size() - 1)));
+					tokens.add(new ZeroOrOne(tokens.remove(tokens.size() - 1), true));
+					size++;
+					break;
+				case '!':
+					tokens.add(new ZeroOrOne(tokens.remove(tokens.size() - 1), false));
 					size++;
 					break;
 				case '+':
-					tokens.add(new OneOrMany(tokens.remove(tokens.size() - 1)));
+					tokens.add(new OneOrMany(tokens.remove(tokens.size() - 1), true));
 					size++;
+					break;
+				case '-':
+					tokens.add(new OneOrMany(tokens.remove(tokens.size() - 1), false));
+					size++;
+					break;
+				case ':':
+					if (i < p.length() - 1) {
+						i++;
+						if (p.charAt(i) == '\\' || p.charAt(i) == ':') {
+							size++;
+							if (i < p.length() - 1) {
+								boolean inverted2 = p.charAt(i) == ':';
+								if (inverted2 && p.charAt(++i) == '\\') {
+									size++;
+									if (i < p.length() - 1) {
+										tokens.add(new Range(tokens, p.charAt(++i), true));
+									} else throw new InvalidPatternException();
+								} else {
+									tokens.add(new Range(tokens, p.charAt(i), inverted2));
+								}
+							} else throw new InvalidPatternException();
+						} else {
+							tokens.add(new Range(tokens, p.charAt(i), false));
+						}
+					} else throw new InvalidPatternException();
+					size += 2;
 					break;
 				case '^':
 					tokens.add(Beginning.getInstance());
@@ -143,9 +179,10 @@ public class Pattern implements Token {
 					break;
 				case '$':
 					tokens.add(Ending.getInstance());
+					size++;
 					break;
 				case '|':
-					tokens.add(new Or(tokens.remove(tokens.size() - 1)));
+					tokens.add(new Or(tokens, size));
 					size++;
 					break;
 				case '.':
@@ -194,12 +231,22 @@ public class Pattern implements Token {
 	}
 
 	@Override
-	public ParserResult search(String s, SParser.Flag flags, boolean greedy, ParserResult pr, long offset, long lineOffset) {
-		return null;
+	public ParserResult search(String s, int flags, ParserResult pr, long offset, long lineOffset) {
+		return null; //TODO
 	}
 
 	@Override
-	public ParserResult match(String s, SParser.Flag flags, boolean greedy, ParserResult pr, long offset, long lineOffset) {
-		return null;
+	public ParserResult match(String s, int flags, ParserResult pr, long offset, long lineOffset) {
+		return null; //TODO
+	}
+
+	@Override
+	public boolean takeOneMore(String s, int flags, ParserResult pr, long offset, long lineOffset) throws InvalidPatternException {
+		return false; //TODO
+	}
+
+	@Override
+	public boolean giveOneBack(String s, int flags, ParserResult pr, long offset, long lineOffset) throws InvalidPatternException {
+		return false; //TODO
 	}
 }

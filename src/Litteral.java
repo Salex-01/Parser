@@ -19,10 +19,10 @@ public class Litteral implements Token {
 	}
 
 	@Override
-	public ParserResult search(String s, SParser.Flag flags, boolean greedy,ParserResult pr, long offset, long lineOffset) {
+	public ParserResult search(String s, int flags, ParserResult pr, long offset, long lineOffset) {
 		String nValue = value;
 		String nS = s;
-		if ((flags.v & SParser.Flag.IGNORE_CASE.v) != 0) {
+		if ((flags & SParser.Flag.IGNORE_CASE.v) != 0) {
 			nS = s.toLowerCase();
 			nValue = value.toLowerCase();
 		}
@@ -40,10 +40,10 @@ public class Litteral implements Token {
 	}
 
 	@Override
-	public ParserResult match(String s, SParser.Flag flags, boolean greedy,ParserResult pr, long offset, long lineOffset) {
+	public ParserResult match(String s, int flags, ParserResult pr, long offset, long lineOffset) {
 		String nValue = value;
 		String nS = s;
-		if ((flags.v & SParser.Flag.IGNORE_CASE.v) != 0) {
+		if ((flags & SParser.Flag.IGNORE_CASE.v) != 0) {
 			nS = s.toLowerCase();
 			nValue = value.toLowerCase();
 		}
@@ -55,5 +55,15 @@ public class Litteral implements Token {
 			}
 		}
 		return new ParserResult(ok, ok ? value.length() : 0, ok ? s.substring(0, value.length()) : null, null, ok ? 0 : -1);
+	}
+
+	@Override
+	public boolean takeOneMore(String s, int flags, ParserResult pr, long offset, long lineOffset) throws InvalidPatternException {
+		return false; //TODO
+	}
+
+	@Override
+	public boolean giveOneBack(String s, int flags, ParserResult pr, long offset, long lineOffset) throws InvalidPatternException {
+		return false; //TODO
 	}
 }

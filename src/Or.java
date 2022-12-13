@@ -1,26 +1,32 @@
-public class ZeroToMany implements Token {
-	Token nested;
-	boolean greedy;
+import java.util.List;
 
-	public ZeroToMany(Token n, boolean g) {
-		nested = n;
-		greedy = g;
+public class Or implements Token {
+	Token first;
+	Token second;
+	List<Token> list;
+
+	public Or(List<Token> t, int size) throws InvalidPatternException {
+		first = new Pattern(List.copyOf(t), size).simplify();
+		t.removeIf(token -> true); // The list has already been copied and saved in the nested Or(.second) if there is one
+		list = t;
 	}
 
 	@Override
 	public Token simplify() throws InvalidPatternException {
-		if (nested != null) nested = nested.simplify();
-		return nested == null ? null : new NTimes(nested, 0, Long.MAX_VALUE, greedy);
+		second = new Pattern(list, 0).simplify();
+		return second == null ? first : (first == null ? second : this);
 	}
 
 	@Override
 	public ParserResult search(String s, int flags, ParserResult pr, long offset, long lineOffset) throws InvalidPatternException {
-		return new NTimes(nested, 0, Long.MAX_VALUE, greedy).search(s, flags, pr, offset, lineOffset);
+		return null;
+		//TODO
 	}
 
 	@Override
 	public ParserResult match(String s, int flags, ParserResult pr, long offset, long lineOffset) throws InvalidPatternException {
-		return new NTimes(nested, 0, Long.MAX_VALUE, greedy).match(s, flags, pr, offset, lineOffset);
+		return null;
+		//TODO
 	}
 
 	@Override
